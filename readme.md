@@ -22,10 +22,13 @@
 * `docker exec -it <php-container-name> mkdir migrations`
 * `docker exec -it <php-container-name> php bin/console make:migration`
 
-#### 8. Application Url (Default): 
+#### 8. Apply migration changes to DB: 
+`docker exec -it <php-container-name> php bin/console doctrine:migrations:migrate`
+
+#### 9. Application Url (Default): 
 `http://localhost`
 
-#### 8. RabbitMQ Dashboard Url (Default): 
+#### 10. RabbitMQ Dashboard Url (Default): 
 `http://localhost:15672`
 
 ## Important Note
