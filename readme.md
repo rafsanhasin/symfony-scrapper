@@ -19,6 +19,7 @@
 `docker exec -it <php-container-name> php bin/console doctrine:database:create`
 
 #### 7. Make migration: 
+`docker exec -it <php-container-name> mkdir migrations`
 `docker exec -it <php-container-name> php bin/console make:migration`
 
 #### 8. Application Url (Default): 
