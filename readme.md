@@ -29,5 +29,5 @@
 
 ## Important Note
 * If there is Cloudflare Verification on visiting the original site then use VPN and set your
- location to USA(I have test with this location).
+ location to USA(I have tested with this location).
 
