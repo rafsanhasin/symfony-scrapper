@@ -4,13 +4,13 @@
 `git@github.com:rafsanhasin/symfony-scrapper.git`
 
 #### 2. Configure docker compose:
-`docker-compose-example.yml`
+`docker-compose.yml` from `docker-compose-example.yml`
 
 #### 3. Build and run docker:
 `docker-compose build && docker-compose up -d`
 
 #### 4. Configure ENV:
-`.env`
+`.env` from `.env,example`
 
 #### 5. Update dependencies:
 `docker exec -it <php-container-name> composer update`
