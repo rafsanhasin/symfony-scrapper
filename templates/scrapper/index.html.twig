@@ -1,0 +1,80 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Company{% endblock %}
+
+{% block body %}
+    <div class="container mt-5">
+        <div class="d-flex justify-content-between align-items-center">
+            <form class="form-inline" method="get">
+                <div class="form-group row">
+                    <div class="form-group mr-2" >
+                        <label>
+                            <input type="text" placeholder="Registration Code" name="registration_code" value="{{ app.request.query.get('registration_code') ?? ""}}">
+                        </label>
+                    </div>
+                    <button class="btn btn-primary ml-2" type="submit">Search</button>
+                </div>
+            </form>
+        </div>
+        {% if error is defined and error is not null %}
+            <div>
+                <span class="text-danger"> {{ error }}</span>
+            </div>
+        {% endif %}
+        {% if success is defined and success is not null %}
+            <div>
+                <span class="text-success"> {{ success }}</span>
+            </div>
+        {% endif %}
+        {% if company is defined and company is not null %}
+            <fieldset disabled="disabled" class="mb-5 mt-4">
+                <div class="container mt-3">
+                    <div class="row col-md-12">
+                        <div class="col-md-6">
+                            <label for="company_name">Name</label><input type="text" id="company_name" class="form-control" value="{{ company['name'] }}" />
+                        </div>
+                        <div class="col-md-6">
+                            <label for="company_registration_code">Registration code</label><input type="number" id="company_registration_code" class="form-control" value="{{ company['registration_code'] }}" />
+                        </div>
+                    </div>
+                    <div class="row col-md-12">
+                        <div class="col-md-6">
+                            <label for="company_vat">Vat</label><input type="text" id="company_vat" class="form-control" value="{{ company['vat'] }}" />
+                        </div>
+                        <div class="col-md-6">
+                            <label for="company_mobile_phone">Mobile phone</label><input type="text" id="company_mobile_phone" class="form-control" value="{{ company['mobile_phone'] }}" />
+                        </div>
+
+                    </div>
+                    <div class="row col-md-12">
+                        <div class="col-md-12">
+                            <label for="company_address">Address</label><textarea id="company_address" class="form-control"> {{ company['address'] }}</textarea>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+        {% endif %}
+        {% if table is defined and table is not null %}
+            <div>
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        {% for th in table[0] %}
+                            <th>{{ th }}</th>
+                        {% endfor %}
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for tr in table | slice(1) %}
+                        <tr>
+                            {% for td in tr %}
+                                <td>{{ td }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

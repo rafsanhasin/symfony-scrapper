@@ -1,0 +1,10 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Create Company{% endblock %}
+
+{% block body %}
+    <div class="container mt-5">
+
+        {{ include('company/_form.html.twig', {'button_label': 'Create'}) }}
+    </div>
+{% endblock %}

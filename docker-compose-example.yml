@@ -1,0 +1,57 @@
+version: '2'
+
+services:
+  nginx:
+    image: nginx:1.25.1
+    ports:
+      - 80:80
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    volumes_from:
+      - php
+    networks:
+      - symfony-nordstreet
+
+  php:
+    build: ./docker/php/
+    volumes:
+      - .:/var/www/html
+    networks:
+      - symfony-nordstreet
+
+  scrapper-database:
+    image: mysql:latest
+    environment:
+      - "MYSQL_ROOT_PASSWORD=root"
+    volumes:
+      - ./backup/data/mysql:/var/lib/mysql
+    ports:
+      - "33067:3306"
+
+  redis:
+    image: redis:latest
+    restart: always
+    ports:
+      - '6379:6379'
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    volumes:
+      - ~/.backup/cache-data/symfony-nordstreet:/var/lib/cache/data
+    networks:
+      - symfony-nordstreet
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: 'scrapper-rabbitmq'
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+    networks:
+      - symfony-nordstreet
+
+networks:
+  symfony-nordstreet:
+    external: true

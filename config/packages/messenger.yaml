@@ -1,0 +1,11 @@
+framework:
+    messenger:
+        transports:
+            # https://symfony.com/doc/current/messenger.html#transport-configuration
+            async:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+        routing:
+            'App\Messages\ScrapMessage': async
+
+            # Route your messages to the transports
+            # 'App\Message\YourMessage': async
