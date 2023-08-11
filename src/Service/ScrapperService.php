@@ -79,9 +79,9 @@ class ScrapperService
             });
 
             $this->companyService->store($company, $table);
-            return ['table' => $table, 'company' => $company, 'error' => ''];
+            return ['table' => $table, 'company' => $company, 'error' => '', 'success' => 'Successfully Fetched'];
         } catch (\Exception $exception) {
-            return ['table' => null, 'company' => null, 'error' => 'Internal Server Error'];
+            return ['table' => null, 'company' => null, 'error' => 'Internal Server Error', 'success' => ''];
         }
     }
 }

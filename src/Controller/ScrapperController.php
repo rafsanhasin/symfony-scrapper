@@ -33,7 +33,7 @@ class ScrapperController extends AbstractController
             if (sizeof($registrationCodes) == 1) {
                 $response = $scrapperSvc->scrap($registrationCode);
 
-                return $this->response($response['table'], $response['company'], $response['error'], 'Successfully fetched');
+                return $this->response($response['table'], $response['company'], $response['error'], $response['success']);
             }
 
             $message = new ScrapMessage(json_encode($registrationCodes));
@@ -41,7 +41,6 @@ class ScrapperController extends AbstractController
 
             return $this->response(null, null, '', 'Request received, will be fetched in the background');
         } catch (\Exception $exception) {
-            dd($exception->getMessage());
             return $this->response(null, null, 'Invalid Input', null);
         }
     }
