@@ -19,15 +19,23 @@
 `docker exec -it <php-container-name> php bin/console doctrine:database:create`
 
 #### 7. Make migration: 
-`docker exec -it <php-container-name> php bin/console make:migration`
+* `docker exec -it <php-container-name> mkdir migrations`
+* `docker exec -it <php-container-name> php bin/console make:migration`
 
-#### 8. Application Url (Default): 
+#### 8. Apply migration changes to DB: 
+`docker exec -it <php-container-name> php bin/console doctrine:migrations:migrate`
+
+#### 9. Application Url (Default): 
 `http://localhost`
 
-#### 8. RabbitMQ Dashboard Url (Default): 
+#### 10. RabbitMQ Dashboard Url (Default): 
 `http://localhost:15672`
 
 ## Important Note
 * If there is Cloudflare Verification on visiting the original site then use VPN and set your
  location to USA(I have tested with this location).
+
+## Search Instruction
+* If a company is searched by a single registration code then it fetches and stores data immediately.
+* If a company is searched by a comma separated strng then it fetches and stores data in the background using RabbitMQ.
 
