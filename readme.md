@@ -31,10 +31,6 @@
 #### 10. RabbitMQ Dashboard Url (Default): 
 `http://localhost:15672`
 
-## Important Note
-* If there is Cloudflare Verification on visiting the original site then use VPN and set your
- location to USA(I have tested with this location).
-
 ## Search Instruction
 * If a company is searched by a single registration code then it fetches and stores data immediately.
 * If a company is searched by a comma separated strng then it fetches and stores data in the background using RabbitMQ.
