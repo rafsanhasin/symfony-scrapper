@@ -17,27 +17,7 @@ RUN pecl install -o -f redis \
 &&  rm -rf /tmp/pear \
 &&  docker-php-ext-enable redis
 
-RUN mkdir -p /var/logs/xm-test
-
-# Install Google Chrome:
-RUN curl -sS -o - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add && \
-    echo "deb https://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list && \
-    apt-get -y update && \
-    apt-get -y install google-chrome-stable
-
-# Install ChromeDriver:
-RUN apt-get update && \
-    apt-get install -y unzip && \
-    wget https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/115.0.5790.170/linux64/chromedriver-linux64.zip && \
-    unzip chromedriver-linux64.zip && \
-    rm chromedriver-linux64.zip && \
-    chmod +x chromedriver-linux64/chromedriver && \
-    mv -f chromedriver-linux64/chromedriver /usr/local/bin/chromedriver
-
-# Cleanup:
-RUN apt-get -y autoremove && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+RUN mkdir -p /var/logs/nordstreet-test
 
 COPY ./supervisord.conf /etc/supervisor
 

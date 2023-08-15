@@ -4,73 +4,116 @@
 namespace App\Service;
 
 
-use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Component\Panther\Client;
+use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
+use Symfony\Component\DomCrawler\Crawler;
 
+/**
+ * Class ScrapperService
+ * @package App\Service
+ */
 class ScrapperService
 {
-    protected $kernel;
+    private $params;
     protected $companyService;
 
     /**
      * ScrapperService constructor.
      * @param CompanyService $companyService
+     * @param ContainerBagInterface $params
      */
-    public function __construct(CompanyService $companyService)
-    {
+    public function __construct(
+        CompanyService $companyService,
+        ContainerBagInterface $params
+    ) {
         $this->companyService = $companyService;
+        $this->params = $params;
     }
 
+    /**
+     * @param $registrationCode
+     * @return array
+     */
     public function scrap($registrationCode) : array {
+        $scrapperApiUrl = $this->params->get('scrapper_api_url');
+        $scrapperApiToken = $this->params->get('scrapper_api_token');
+        $scrapeUrl = $this->params->get('scape_url');
+
         try{
-            //$client = Client::createChromeClient( $this->kernel->getProjectDir().'/chrome_binary/chromedriver');
-            $client = Client::createChromeClient(
-                '/usr/local/bin/chromedriver',
-                [
-                    '--remote-debugging-port=9222',
-                    '--no-sandbox',
-                    '--disable-dev-shm-usage',
-                    '--headless'
-                ]
-            );
-            $client->get('https://rekvizitai.vz.lt/en/company-search/');
+            $curl = curl_init();
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($curl, CURLOPT_HEADER, false);
 
-            $client->executeScript("document.querySelector('input[name=\"code\"]').value ='".$registrationCode."';");
+            $array = [
+                ["Action"=> "Wait", "WaitSelector"=> "#code", "Timeout"=> 5000],
+                ["Action"=> "Execute", "Execute"=> "document.querySelector('input[name=\"code\"]').value ='".$registrationCode."';"],
+                ["Action"=> "Execute", "Execute"=> "document.querySelector('form').submit();"],
+                ["Action"=> "Wait", "WaitSelector"=> ".company-title", "Timeout"=> 5000]
+            ];
 
-            $client->executeScript("document.querySelector('form').submit();");
+            curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'GET');
+            curl_setopt($curl, CURLOPT_URL, $scrapperApiUrl."?render=true&playWithBrowser=".urlencode(json_encode($array))."&token=".$scrapperApiToken."&url=".urlencode($scrapeUrl) );
+            curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+                "Accept: */*",
+            ));
 
-            $crawler = $client->waitFor('.company-title');
+            $searchResponse = curl_exec($curl);
+            curl_close($curl);
 
-            $href = $crawler->filter('.company-title')->attr('href');
+            $searchCrawler = new Crawler($searchResponse);
 
-            $client->get($href);
+            $companyLinkUrl = $searchCrawler->filter('.company-title')->attr('href');
 
-            $crawler = $client->waitFor('#rekvizitai-app');
+            $curl = curl_init();
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($curl, CURLOPT_HEADER, false);
+            $data = [
+                "url" => $companyLinkUrl,
+                "token" => $scrapperApiToken,
+            ];
+            curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'GET');
+            curl_setopt($curl, CURLOPT_URL, $scrapperApiUrl."?".http_build_query($data));
+            curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+                "Accept: */*",
+            ));
+            $companyPage = curl_exec($curl);
+            curl_close($curl);
+
+            $crawler = new Crawler($companyPage);
 
             $company = array();
-
             $company['name'] = $title = $crawler->filter('h1.title')->text();
             $company['registration_code'] = $crawler->filterXPath('//td[@class="name" and contains(text(), "Registration code")]/following-sibling::td[@class="value"]')->text();
             $company['vat'] = $crawler->filterXPath('//td[@class="name" and contains(text(), "VAT")]/following-sibling::td[@class="value"]')->text();
             $company['address'] = $crawler->filterXPath('//td[@class="name" and contains(text(), "Address")]/following-sibling::td[@class="value"]')->text();
             $company['mobile_phone'] = $crawler->filterXPath('//td[@class="name" and contains(text(), "Phone")]/following-sibling::td[@class="value"]')->text();
+            $financialTabLink = $crawler->filter('a.nav-link[title="Company financial data"]')->attr('href');
 
-            $financialTab = $crawler->filter('a.nav-link[title="Company financial data"]')->attr('href');
-            $client->get($financialTab);
+            $curl = curl_init();
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($curl, CURLOPT_HEADER, false);
 
-            $client->executeScript("
-            document.querySelectorAll('.finances-table td').forEach(function(td) {
-                td.removeAttribute('style');
-            });"
-            );
+            $array = [
+                ["Action"=> "Wait", "WaitSelector"=> ".finances-table", "Timeout"=> 5000],
+                ["Action"=> "Execute", "Execute"=>
+                    "document.querySelectorAll('.finances-table td').forEach(function(td) {
+                        td.removeAttribute('style');});"
+                ],
+                ["Action"=> "Execute", "Execute"=>
+                    "document.querySelectorAll('.finances-table th').forEach(function(th) {
+                    th.removeAttribute('style');});"
+                ],
+            ];
 
-            $client->executeScript("
-            document.querySelectorAll('.finances-table th').forEach(function(th) {
-                th.removeAttribute('style');
-            });"
-            );
+            curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'GET');
+            curl_setopt($curl, CURLOPT_URL, $scrapperApiUrl."?render=true&playWithBrowser=".urlencode(json_encode($array))."&token=".$scrapperApiToken."&url=".urlencode($financialTabLink) );
+            curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+                "Accept: */*",
+            ));
 
-            $crawler = $client->waitFor('.finances-table');
+            $response = curl_exec($curl);
+            curl_close($curl);
+
+            $crawler = new Crawler($response);
 
             $table = $crawler->filter('.finances-table')->filter('tr')->each(function ($tr, $i) {
                 return $tr->filter('th, td')->each(function ($td, $i) {
@@ -79,6 +122,7 @@ class ScrapperService
             });
 
             $this->companyService->store($company, $table);
+
             return ['table' => $table, 'company' => $company, 'error' => '', 'success' => 'Successfully Fetched'];
         } catch (\Exception $exception) {
             return ['table' => null, 'company' => null, 'error' => 'Internal Server Error', 'success' => ''];
